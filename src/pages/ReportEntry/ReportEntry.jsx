@@ -96,6 +96,7 @@ export default function ReportEntry() {
       setErrors(errs);
       return;
     }
+    
 
     setIsSubmitting(true);
     try {
