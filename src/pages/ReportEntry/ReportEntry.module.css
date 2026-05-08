@@ -140,6 +140,17 @@
   background: #fffbeb;
 }
 
+.inputError {
+  border-color: #ef4444 !important;
+}
+
+.errorMsg {
+  font-size: 11px;
+  color: #ef4444;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
 .useLastBtn {
   display: inline-flex;
   align-items: center;
@@ -293,6 +304,11 @@
   margin-top: 4px;
 }
 .saveBtn:hover { background: #1d4ed8; }
+
+.saveBtn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
 
 .notFound {
   padding: 40px;

@@ -47,31 +47,51 @@ export default function ClientForm() {
 
   const validate = () => {
     const errs = {};
-    if (!form.client1Name.trim()) errs.client1Name = "Required";
-    if (!form.dob) errs.dob = "Required";
-    if (!form.monthlySalary) errs.monthlySalary = "Required";
-    if (!form.monthlyExpenseBudget) errs.monthlyExpenseBudget = "Required";
+    if (!form.client1Name.trim()) errs.client1Name = "Name is required";
+    if (!form.dob) errs.dob = "Date of birth is required";
+    if (form.lastFourSSN && !/^\d{4}$/.test(form.lastFourSSN)) errs.lastFourSSN = "Must be 4 digits";
+    
+    if (form.monthlySalary === "" || isNaN(form.monthlySalary)) errs.monthlySalary = "Required";
+    else if (parseFloat(form.monthlySalary) < 0) errs.monthlySalary = "Cannot be negative";
+    
+    if (form.monthlyExpenseBudget === "" || isNaN(form.monthlyExpenseBudget)) errs.monthlyExpenseBudget = "Required";
+    else if (parseFloat(form.monthlyExpenseBudget) < 0) errs.monthlyExpenseBudget = "Cannot be negative";
+
+    if (form.privateReserveTarget && parseFloat(form.privateReserveTarget) < 0) errs.privateReserveTarget = "Cannot be negative";
+    
     return errs;
   };
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
+    if (Object.keys(errs).length) { 
+      setErrors(errs); 
+      return; 
+    }
 
-    const parsed = {
-      ...form,
-      monthlySalary: parseFloat(form.monthlySalary) || 0,
-      monthlyExpenseBudget: parseFloat(form.monthlyExpenseBudget) || 0,
-      privateReserveTarget: parseFloat(form.privateReserveTarget) || 0,
-      retirementAccounts: form.retirementAccounts.filter((a) => a.name).map((a) => ({ ...a, value: parseFloat(a.value) || 0 })),
-      nonRetirementAccounts: form.nonRetirementAccounts.filter((a) => a.name).map((a) => ({ ...a, value: parseFloat(a.value) || 0 })),
-      trustAssets: form.trustAssets.filter((a) => a.name).map((a) => ({ ...a, value: parseFloat(a.value) || 0 })),
-      liabilities: form.liabilities.filter((a) => a.name).map((a) => ({ ...a, value: parseFloat(a.value) || 0 })),
-    };
+    setIsSubmitting(true);
+    try {
+      const parsed = {
+        ...form,
+        monthlySalary: parseFloat(form.monthlySalary) || 0,
+        monthlyExpenseBudget: parseFloat(form.monthlyExpenseBudget) || 0,
+        privateReserveTarget: parseFloat(form.privateReserveTarget) || 0,
+        retirementAccounts: form.retirementAccounts.filter((a) => a.name).map((a) => ({ ...a, value: parseFloat(a.value) || 0 })),
+        nonRetirementAccounts: form.nonRetirementAccounts.filter((a) => a.name).map((a) => ({ ...a, value: parseFloat(a.value) || 0 })),
+        trustAssets: form.trustAssets.filter((a) => a.name).map((a) => ({ ...a, value: parseFloat(a.value) || 0 })),
+        liabilities: form.liabilities.filter((a) => a.name).map((a) => ({ ...a, value: parseFloat(a.value) || 0 })),
+      };
 
-    const id = await addClient(parsed);
-    navigate(`/clients/${id}`);
+      const id = await addClient(parsed);
+      navigate(`/clients/${id}`);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -110,9 +130,9 @@ export default function ClientForm() {
                   onChange={(e) => set("dob", e.target.value)}
                 />
               </Field>
-              <Field label="Last 4 SSN">
+              <Field label="Last 4 SSN" error={errors.lastFourSSN}>
                 <input
-                  className={styles.input}
+                  className={`${styles.input} ${errors.lastFourSSN ? styles.inputError : ""}`}
                   value={form.lastFourSSN}
                   onChange={(e) => set("lastFourSSN", e.target.value.slice(0, 4))}
                   placeholder="XXXX"
@@ -143,10 +163,10 @@ export default function ClientForm() {
                   placeholder="0"
                 />
               </Field>
-              <Field label="Private Reserve Target ($)">
+              <Field label="Private Reserve Target ($)" error={errors.privateReserveTarget}>
                 <input
                   type="number"
-                  className={styles.input}
+                  className={`${styles.input} ${errors.privateReserveTarget ? styles.inputError : ""}`}
                   value={form.privateReserveTarget}
                   onChange={(e) => set("privateReserveTarget", e.target.value)}
                   placeholder="0"
@@ -197,8 +217,8 @@ export default function ClientForm() {
             <button type="button" className={styles.btnCancel} onClick={() => navigate(-1)}>
               <X size={15} /> Cancel
             </button>
-            <button type="submit" className={styles.btnSubmit}>
-              <Save size={15} /> Save Client Profile
+            <button type="submit" className={styles.btnSubmit} disabled={isSubmitting}>
+              <Save size={15} /> {isSubmitting ? "Saving..." : "Save Client Profile"}
             </button>
           </div>
         </form>

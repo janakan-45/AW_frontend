@@ -81,25 +81,47 @@ export default function ReportEntry() {
     return { retirementTotal, nonRetirementTotal, trustTotal, liabilitiesTotal, grandTotal };
   }, [balances]);
 
+  const validate = () => {
+    const errs = {};
+    if (sacs.inflow <= 0) errs.inflow = "Inflow must be greater than 0";
+    if (sacs.outflow <= 0) errs.outflow = "Outflow must be greater than 0";
+    return errs;
+  };
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async () => {
-    const report = {
-      quarter,
-      sacs: {
-        inflow: sacsCalc.totalInflow,
-        outflow: sacsCalc.totalOutflow,
-        privateReserve: sacs.privateReserve,
-        excess: sacsCalc.excess,
-        monthlySalary: sacs.inflow,
-        monthlyExpenses: sacs.outflow,
-        otherIncome: sacs.otherIncome,
-        taxes: sacs.taxes,
-      },
-      tcc: tccCalc,
-      balances: Object.fromEntries(Object.entries(balances).map(([k, v]) => [k, v.value])),
-      clientSnapshot: { ...client },
-    };
-    const reportId = await addReport(clientId, report);
-    navigate(`/clients/${clientId}/report/${reportId}`);
+    const errs = validate();
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const report = {
+        quarter,
+        sacs: {
+          inflow: sacsCalc.totalInflow,
+          outflow: sacsCalc.totalOutflow,
+          privateReserve: sacs.privateReserve,
+          excess: sacsCalc.excess,
+          monthlySalary: sacs.inflow,
+          monthlyExpenses: sacs.outflow,
+          otherIncome: sacs.otherIncome,
+          taxes: sacs.taxes,
+        },
+        tcc: tccCalc,
+        balances: Object.fromEntries(Object.entries(balances).map(([k, v]) => [k, v.value])),
+        clientSnapshot: { ...client },
+      };
+      const reportId = await addReport(clientId, report);
+      navigate(`/clients/${clientId}/report/${reportId}`);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!client) return <div className={styles.notFound}>Client not found</div>;
@@ -140,11 +162,18 @@ export default function ReportEntry() {
 
               <div className={styles.formGrid2}>
                 <InputField
-                  label="Monthly Salary / Inflow"
+                  label="Monthly Salary / Inflow *"
                   value={sacs.inflow}
-                  onChange={(v) => setSacs((s) => ({ ...s, inflow: parseFloat(v) || 0 }))}
+                  onChange={(v) => {
+                    setSacs((s) => ({ ...s, inflow: parseFloat(v) || 0 }));
+                    setErrors((e) => ({ ...e, inflow: undefined }));
+                  }}
                   lastValue={lastReport?.sacs?.monthlySalary}
-                  onUseLast={() => setSacs((s) => ({ ...s, inflow: lastReport?.sacs?.monthlySalary ?? s.inflow }))}
+                  onUseLast={() => {
+                    setSacs((s) => ({ ...s, inflow: lastReport?.sacs?.monthlySalary ?? sacs.inflow }));
+                    setErrors((e) => ({ ...e, inflow: undefined }));
+                  }}
+                  error={errors.inflow}
                 />
                 <InputField
                   label="Other Income"
@@ -152,11 +181,18 @@ export default function ReportEntry() {
                   onChange={(v) => setSacs((s) => ({ ...s, otherIncome: parseFloat(v) || 0 }))}
                 />
                 <InputField
-                  label="Monthly Expenses / Outflow"
+                  label="Monthly Expenses / Outflow *"
                   value={sacs.outflow}
-                  onChange={(v) => setSacs((s) => ({ ...s, outflow: parseFloat(v) || 0 }))}
+                  onChange={(v) => {
+                    setSacs((s) => ({ ...s, outflow: parseFloat(v) || 0 }));
+                    setErrors((e) => ({ ...e, outflow: undefined }));
+                  }}
                   lastValue={lastReport?.sacs?.monthlyExpenses}
-                  onUseLast={() => setSacs((s) => ({ ...s, outflow: lastReport?.sacs?.monthlyExpenses ?? s.outflow }))}
+                  onUseLast={() => {
+                    setSacs((s) => ({ ...s, outflow: lastReport?.sacs?.monthlyExpenses ?? sacs.outflow }));
+                    setErrors((e) => ({ ...e, outflow: undefined }));
+                  }}
+                  error={errors.outflow}
                 />
                 <InputField
                   label="Taxes"
@@ -274,9 +310,9 @@ export default function ReportEntry() {
                 </div>
               </div>
 
-              <button className={styles.saveBtn} onClick={handleSubmit}>
+              <button className={styles.saveBtn} onClick={handleSubmit} disabled={isSubmitting}>
                 <Save size={16} />
-                Save & Generate Report
+                {isSubmitting ? "Generating..." : "Save & Generate Report"}
               </button>
             </div>
           </div>
@@ -286,7 +322,7 @@ export default function ReportEntry() {
   );
 }
 
-function InputField({ label, value, onChange, lastValue, onUseLast }) {
+function InputField({ label, value, onChange, lastValue, onUseLast, error }) {
   const hasLast = lastValue !== undefined && lastValue !== null;
   return (
     <div className={styles.inputField}>
@@ -300,11 +336,12 @@ function InputField({ label, value, onChange, lastValue, onUseLast }) {
       </div>
       <input
         type="number"
-        className={styles.numInput}
+        className={`${styles.numInput} ${error ? styles.inputError : ""}`}
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder="0"
       />
+      {error && <span className={styles.errorMsg}>{error}</span>}
     </div>
   );
 }

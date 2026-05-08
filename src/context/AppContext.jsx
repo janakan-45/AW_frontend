@@ -1,14 +1,20 @@
 import { createContext, useContext, useState, useEffect, useRef } from "react";
 import api from "../services/api";
 import { initialClients } from "../data/mockData";
+import Notification from "../components/Notification/Notification";
 
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState(null);
 
   const initialized = useRef(false);
+
+  const notify = (message, type = "success") => {
+    setNotification({ message, type });
+  };
 
   // Initialize data — sync with backend, fallback to mock if API fails
   useEffect(() => {
@@ -50,6 +56,7 @@ export function AppProvider({ children }) {
     try {
       const newClient = await api.createClient(client);
       setClients(prev => [...prev, newClient]);
+      notify("Client profile created successfully!");
       return newClient.id;
     } catch (err) {
       // Fallback
@@ -61,6 +68,7 @@ export function AppProvider({ children }) {
         createdAt: new Date().toISOString().split("T")[0],
       };
       saveToLocal([...clients, newClient]);
+      notify("Client profile saved locally (Backend unavailable).");
       return newClient.id;
     }
   };
@@ -69,8 +77,10 @@ export function AppProvider({ children }) {
     try {
       const updated = await api.updateClient(id, updates);
       setClients(prev => prev.map(c => c.id === id ? updated : c));
+      notify("Client profile updated successfully!");
     } catch (err) {
       saveToLocal(clients.map((c) => (c.id === id ? { ...c, ...updates } : c)));
+      notify("Client updated locally.", "info");
     }
   };
 
@@ -78,8 +88,10 @@ export function AppProvider({ children }) {
     try {
       await api.deleteClient(id);
       setClients(prev => prev.filter(c => c.id !== id));
+      notify("Client deleted successfully.");
     } catch (err) {
       saveToLocal(clients.filter((c) => c.id !== id));
+      notify("Client removed locally.", "info");
     }
   };
 
@@ -91,6 +103,7 @@ export function AppProvider({ children }) {
           ? { ...c, reports: [...(c.reports || []), newReport], lastReportDate: newReport.date }
           : c
       ));
+      notify("Quarterly report generated successfully!");
       return newReport.id;
     } catch (err) {
       const newReport = {
@@ -109,6 +122,7 @@ export function AppProvider({ children }) {
             : c
         )
       );
+      notify("Report saved locally.", "info");
       return newReport.id;
     }
   };
@@ -124,10 +138,18 @@ export function AppProvider({ children }) {
         updateClient, 
         deleteClient, 
         addReport, 
-        getClient 
+        getClient,
+        notify 
       }}
     >
       {children}
+      {notification && (
+        <Notification 
+          message={notification.message} 
+          type={notification.type} 
+          onClose={() => setNotification(null)} 
+        />
+      )}
     </AppContext.Provider>
   );
 }

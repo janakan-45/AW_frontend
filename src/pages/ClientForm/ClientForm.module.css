@@ -216,6 +216,11 @@
   background: #1d4ed8;
 }
 
+.btnSubmit:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
 @media (max-width: 640px) {
   .content {
     padding: 16px;
