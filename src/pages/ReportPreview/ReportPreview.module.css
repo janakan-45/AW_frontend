@@ -1,0 +1,434 @@
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f1f5f9;
+  min-height: 100vh;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.backBtn:hover { color: #2563eb; }
+
+.btnGroup {
+  display: flex;
+  gap: 10px;
+}
+
+.btnCanva {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7c3aed;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btnCanva:hover { background: #f5f3ff; border-color: #7c3aed; }
+
+.btnPDF {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btnPDF:hover { background: #1d4ed8; }
+
+.reportWrapper {
+  padding: 32px;
+  display: flex;
+  justify-content: center;
+}
+
+/* The actual printable report */
+.report {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  max-width: 900px;
+  width: 100%;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.reportHeader {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+  padding: 28px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reportBrand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brandLogo {
+  width: 46px;
+  height: 46px;
+  background: #2563eb;
+  color: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.brandName {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.brandSub {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.reportMeta {
+  text-align: right;
+}
+
+.reportClient {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.reportPeriod {
+  font-size: 13px;
+  color: #93c5fd;
+  margin-top: 4px;
+}
+
+.reportSSN {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 3px;
+}
+
+.reportSection {
+  padding: 28px 36px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.reportSection:last-of-type {
+  border-bottom: none;
+}
+
+.sectionLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 22px;
+}
+
+.sectionBadge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+/* SACS Flow */
+.sacsFlow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.flowArrow {
+  flex-shrink: 0;
+}
+
+.flowMid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.flowDown {
+  display: flex;
+  justify-content: center;
+}
+
+.bubble {
+  border: 2px solid;
+  border-radius: 12px;
+  padding: 16px 20px;
+  min-width: 140px;
+  text-align: center;
+  transition: transform 0.15s;
+}
+
+.bubble:hover {
+  transform: translateY(-2px);
+}
+
+.bubbleHighlight {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.bubbleIcon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.bubbleLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bubbleValue {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 4px 0;
+  letter-spacing: -0.5px;
+}
+
+.bubbleSub {
+  font-size: 10.5px;
+  color: #94a3b8;
+}
+
+/* SACS Table */
+.sacsTable {
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.sacsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 13.5px;
+}
+
+.sacsRow:last-child { border-bottom: none; }
+
+.sacsTotal {
+  background: #f1f5f9;
+  font-weight: 600;
+}
+
+.sacsRowLabel { color: #374151; }
+.sacsRowValue { font-weight: 600; }
+
+/* TCC Grid */
+.tccGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.accountBlock {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.accountBlockTitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.accountBlockRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 12.5px;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.accountBlockName { color: #374151; }
+.accountBlockValue { font-weight: 600; }
+
+.accountBlockTotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Summary Cards */
+.summaryCards {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.summaryCard {
+  flex: 1;
+  min-width: 120px;
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+
+.summaryHighlight {
+  color: white;
+}
+
+.summaryLabel {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.summaryHighlight .summaryLabel {
+  color: #93c5fd;
+}
+
+.summaryValue {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.liabDisclaimer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #ef4444;
+  background: #fef2f2;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.reportFooter {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  padding: 14px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.notFound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 12px;
+  font-size: 16px;
+  color: #ef4444;
+}
+
+@media (max-width: 640px) {
+  .controls {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 16px;
+  }
+  .reportWrapper {
+    padding: 16px;
+  }
+  .reportHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+  }
+  .reportMeta {
+    text-align: left;
+  }
+  .reportSection {
+    padding: 20px;
+  }
+  .tccGrid {
+    grid-template-columns: 1fr;
+  }
+  .sacsFlow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .flowArrow {
+    transform: rotate(90deg);
+    align-self: center;
+    margin: 8px 0;
+  }
+  .bubble {
+    min-width: 100%;
+  }
+  .reportFooter {
+    padding: 14px 20px;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}
