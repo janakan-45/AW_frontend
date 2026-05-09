@@ -1,15 +1,30 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
 import Header from "../../components/Header/Header";
-import { Plus, ChevronRight, Calendar, TrendingUp, AlertCircle } from "lucide-react";
+import { Plus, ChevronRight, Calendar, TrendingUp, AlertCircle, Edit3, Trash2, X, AlertTriangle } from "lucide-react";
 import styles from "./Clients.module.css";
 
 const fmt = (n) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n ?? 0);
 
 export default function Clients() {
-  const { clients } = useApp();
+  const { clients, deleteClient } = useApp();
   const navigate = useNavigate();
+
+  const [deleteTarget, setDeleteTarget] = useState(null); // client to confirm-delete
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      await deleteClient(deleteTarget.id);
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -71,10 +86,16 @@ export default function Clients() {
                     View Profile
                   </button>
                   <button
-                    className={styles.actionBtnPrimary}
-                    onClick={(e) => { e.stopPropagation(); navigate(`/clients/${client.id}/report/new`); }}
+                    className={styles.actionBtnEdit}
+                    onClick={(e) => { e.stopPropagation(); navigate(`/clients/${client.id}/edit`); }}
                   >
-                    <Plus size={13} /> New Report
+                    <Edit3 size={13} /> Edit
+                  </button>
+                  <button
+                    className={styles.actionBtnDelete}
+                    onClick={(e) => { e.stopPropagation(); setDeleteTarget(client); }}
+                  >
+                    <Trash2 size={13} />
                   </button>
                 </div>
               </div>
@@ -88,6 +109,39 @@ export default function Clients() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className={styles.modalOverlay} onClick={() => !isDeleting && setDeleteTarget(null)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalIcon}>
+              <AlertTriangle size={28} color="#ef4444" />
+            </div>
+            <h3 className={styles.modalTitle}>Delete Client?</h3>
+            <p className={styles.modalBody}>
+              Are you sure you want to permanently delete{" "}
+              <strong>{deleteTarget.client1Name}{deleteTarget.client2Name ? ` & ${deleteTarget.client2Name}` : ""}</strong>?
+              This will also remove all their reports and cannot be undone.
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                className={styles.modalBtnCancel}
+                onClick={() => setDeleteTarget(null)}
+                disabled={isDeleting}
+              >
+                <X size={14} /> Cancel
+              </button>
+              <button
+                className={styles.modalBtnDelete}
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+              >
+                <Trash2 size={14} /> {isDeleting ? "Deleting..." : "Delete Client"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

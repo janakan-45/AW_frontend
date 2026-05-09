@@ -1,31 +1,61 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
 import Header from "../../components/Header/Header";
-import { Plus, Trash2, ArrowLeft, Save, X } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, Save, X, Edit3 } from "lucide-react";
 import styles from "./ClientForm.module.css";
 
 const emptyAccount = () => ({ id: `acc-${Date.now()}-${Math.random()}`, name: "", value: 0 });
 
+const EMPTY_FORM = {
+  client1Name: "",
+  client2Name: "",
+  dob: "",
+  lastFourSSN: "",
+  monthlySalary: "",
+  monthlyExpenseBudget: "",
+  privateReserveTarget: "",
+  retirementAccounts: [emptyAccount()],
+  nonRetirementAccounts: [emptyAccount()],
+  trustAssets: [],
+  liabilities: [emptyAccount()],
+};
+
 export default function ClientForm() {
-  const { addClient } = useApp();
+  const { addClient, updateClient, getClient } = useApp();
   const navigate = useNavigate();
+  const { id } = useParams(); // present when editing
 
-  const [form, setForm] = useState({
-    client1Name: "",
-    client2Name: "",
-    dob: "",
-    lastFourSSN: "",
-    monthlySalary: "",
-    monthlyExpenseBudget: "",
-    privateReserveTarget: "",
-    retirementAccounts: [emptyAccount()],
-    nonRetirementAccounts: [emptyAccount()],
-    trustAssets: [],
-    liabilities: [emptyAccount()],
-  });
+  const isEditing = Boolean(id);
+  const existingClient = isEditing ? getClient(id) : null;
 
+  const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Populate form when editing
+  useEffect(() => {
+    if (isEditing && existingClient) {
+      const mapAccounts = (arr = []) =>
+        arr.length > 0
+          ? arr.map((a) => ({ id: a.id || `acc-${Date.now()}-${Math.random()}`, name: a.name || "", value: a.value ?? 0 }))
+          : [emptyAccount()];
+
+      setForm({
+        client1Name: existingClient.client1Name || "",
+        client2Name: existingClient.client2Name || "",
+        dob: existingClient.dob || "",
+        lastFourSSN: existingClient.lastFourSSN || "",
+        monthlySalary: existingClient.monthlySalary !== undefined ? String(existingClient.monthlySalary) : "",
+        monthlyExpenseBudget: existingClient.monthlyExpenseBudget !== undefined ? String(existingClient.monthlyExpenseBudget) : "",
+        privateReserveTarget: existingClient.privateReserveTarget !== undefined ? String(existingClient.privateReserveTarget) : "",
+        retirementAccounts: mapAccounts(existingClient.retirementAccounts),
+        nonRetirementAccounts: mapAccounts(existingClient.nonRetirementAccounts),
+        trustAssets: existingClient.trustAssets?.length > 0 ? existingClient.trustAssets.map((a) => ({ id: a.id || `acc-${Date.now()}-${Math.random()}`, name: a.name || "", value: a.value ?? 0 })) : [],
+        liabilities: mapAccounts(existingClient.liabilities),
+      });
+    }
+  }, [isEditing, existingClient]);
 
   const set = (field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
@@ -50,26 +80,24 @@ export default function ClientForm() {
     if (!form.client1Name.trim()) errs.client1Name = "Name is required";
     if (!form.dob) errs.dob = "Date of birth is required";
     if (form.lastFourSSN && !/^\d{4}$/.test(form.lastFourSSN)) errs.lastFourSSN = "Must be 4 digits";
-    
+
     if (form.monthlySalary === "" || isNaN(form.monthlySalary)) errs.monthlySalary = "Required";
     else if (parseFloat(form.monthlySalary) < 0) errs.monthlySalary = "Cannot be negative";
-    
+
     if (form.monthlyExpenseBudget === "" || isNaN(form.monthlyExpenseBudget)) errs.monthlyExpenseBudget = "Required";
     else if (parseFloat(form.monthlyExpenseBudget) < 0) errs.monthlyExpenseBudget = "Cannot be negative";
 
     if (form.privateReserveTarget && parseFloat(form.privateReserveTarget) < 0) errs.privateReserveTarget = "Cannot be negative";
-    
+
     return errs;
   };
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate();
-    if (Object.keys(errs).length) { 
-      setErrors(errs); 
-      return; 
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
     }
 
     setIsSubmitting(true);
@@ -85,8 +113,13 @@ export default function ClientForm() {
         liabilities: form.liabilities.filter((a) => a.name).map((a) => ({ ...a, value: parseFloat(a.value) || 0 })),
       };
 
-      const id = await addClient(parsed);
-      navigate(`/clients/${id}`);
+      if (isEditing) {
+        await updateClient(id, parsed);
+        navigate(`/clients/${id}`);
+      } else {
+        const newId = await addClient(parsed);
+        navigate(`/clients/${newId}`);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -96,7 +129,10 @@ export default function ClientForm() {
 
   return (
     <div className={styles.page}>
-      <Header title="New Client Profile" subtitle="Create a new client relationship" />
+      <Header
+        title={isEditing ? "Edit Client Profile" : "New Client Profile"}
+        subtitle={isEditing ? `Editing ${existingClient?.client1Name || "client"}` : "Create a new client relationship"}
+      />
       <div className={styles.content}>
         <button className={styles.backBtn} onClick={() => navigate(-1)}>
           <ArrowLeft size={15} /> Back
@@ -218,7 +254,8 @@ export default function ClientForm() {
               <X size={15} /> Cancel
             </button>
             <button type="submit" className={styles.btnSubmit} disabled={isSubmitting}>
-              <Save size={15} /> {isSubmitting ? "Saving..." : "Save Client Profile"}
+              {isEditing ? <Edit3 size={15} /> : <Save size={15} />}
+              {isSubmitting ? "Saving..." : isEditing ? "Update Client" : "Save Client Profile"}
             </button>
           </div>
         </form>

@@ -21,6 +21,7 @@ export default function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/clients" element={<Clients />} />
               <Route path="/clients/new" element={<ClientForm />} />
+              <Route path="/clients/:id/edit" element={<ClientForm />} />
               <Route path="/clients/:id" element={<ClientDetail />} />
               <Route path="/clients/:clientId/report/new" element={<ReportEntry />} />
               <Route path="/clients/:clientId/report/:reportId" element={<ReportPreview />} />
