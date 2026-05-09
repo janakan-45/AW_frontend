@@ -38,7 +38,7 @@ export default function ClientDetail() {
       />
       <div className={styles.content}>
         <div className={styles.topRow}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
+          <button className={styles.backBtn} onClick={() => navigate("/clients")}>
             <ArrowLeft size={15} /> Back
           </button>
           <button
